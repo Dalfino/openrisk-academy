@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenRisk Academy — Free Financial Risk Education for Everyone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #070b0f;
+    --bg2:      #0d1318;
+    --bg3:      #111920;
+    --border:   #1e2d38;
+    --green:    #00e5a0;
+    --amber:    #f5a623;
+    --red:      #ff4757;
+    --blue:     #4fc3f7;
+    --purple:   #b39ddb;
+    --text:     #c8d8e4;
+    --muted:    #4a6070;
+    --white:    #eaf4fb;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 2px; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    background: rgba(7,11,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--green);
+    letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--muted); }
+  .nav-links {
+    display: flex; gap: 1.8rem; list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--bg);
+    background: var(--green);
+    padding: 0.45rem 1.1rem;
+    border-radius: 2px;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+  .hero-glow {
+    position: absolute; top: 20%; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(0,229,160,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto; width: 100%;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.25);
+    padding: 0.35rem 0.9rem;
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--green);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.5s ease infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 1; } 50% { opacity: 0; }
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 10vw, 9rem);
+    line-height: 0.9;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.3em;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  h1 .accent { color: var(--green); }
+  h1 .line2 { display: block; color: var(--muted); font-size: 0.55em; }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--text);
+    max-width: 560px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  .hero-sub strong { color: var(--green); font-weight: 500; }
+
+  .hero-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--green);
+    color: var(--bg);
+    padding: 0.85rem 2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 0 30px rgba(0,229,160,0.2);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(0,229,160,0.35);
+  }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.85rem 2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+
+  .hero-stats {
+    display: flex; gap: 3rem; margin-top: 5rem; flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.45s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    color: var(--white);
+    line-height: 1;
+  }
+  .stat-num .unit { font-size: 1.2rem; color: var(--green); }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    height: 36px;
+    display: flex; align-items: center;
+  }
+  .ticker-track {
+    display: flex; gap: 0;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .ticker-item {
+    padding: 0 2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.6rem;
+    height: 36px;
+  }
+  .ticker-item .tag { color: var(--green); }
+  .ticker-item .val { color: var(--muted); }
+
+  /* ── SECTION COMMONS ── */
+  section { padding: 6rem 2rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block; width: 2rem; height: 1px;
+    background: var(--green);
+  }
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+  h2 .dim { color: var(--muted); }
+  .section-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ── CERTIFICATIONS GRID ── */
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .cert-card {
+    background: var(--bg2);
+    padding: 1.8rem;
+    position: relative;
+    transition: background 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    overflow: hidden;
+  }
+  .cert-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--green));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .cert-card:hover { background: var(--bg3); }
+  .cert-card:hover::after { transform: scaleX(1); }
+  .cert-tier {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--card-accent, var(--green));
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+  .cert-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+    line-height: 1;
+  }
+  .cert-full {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    line-height: 1.4;
+  }
+  .cert-tags {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+  .cert-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .cert-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  .cert-status {
+    display: flex; align-items: center; gap: 0.4rem;
+    color: var(--amber);
+  }
+  .cert-status.live { color: var(--green); }
+  .cert-status .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .cert-status.live .dot { animation: blink 1.5s ease infinite; }
+  .cert-arrow {
+    font-size: 1rem;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .cert-card:hover .cert-arrow { color: var(--card-accent, var(--green)); transform: translateX(4px); }
+
+  /* ── ARCHITECTURE ── */
+  .arch-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .arch-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+  .arch-tree {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 2;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    border-radius: 2px;
+    overflow-x: auto;
+  }
+  .arch-tree .folder { color: var(--amber); }
+  .arch-tree .file   { color: var(--text); }
+  .arch-tree .comment { color: var(--muted); opacity: 0.6; }
+  .arch-tree .highlight { color: var(--green); }
+
+  .arch-pillars { display: flex; flex-direction: column; gap: 1.5rem; }
+  .pillar {
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .pillar:hover { border-color: rgba(0,229,160,0.3); }
+  .pillar-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: var(--bg3);
+    position: absolute; right: 1rem; top: 0.5rem;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .pillar-icon { font-size: 1.4rem; margin-bottom: 0.6rem; }
+  .pillar-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--green);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+  .pillar-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── ROADMAP ── */
+  .roadmap { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .roadmap::before {
+    content: '';
+    position: absolute; left: 11px; top: 0; bottom: 0;
+    width: 1px; background: var(--border);
+  }
+  .road-item {
+    display: flex; gap: 2rem;
+    padding-bottom: 2.5rem;
+    position: relative;
+  }
+  .road-dot {
+    width: 24px; height: 24px; flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    position: relative; z-index: 1;
+    margin-top: 2px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .road-item.active .road-dot {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--bg);
+    box-shadow: 0 0 12px rgba(0,229,160,0.4);
+  }
+  .road-item.next .road-dot {
+    background: rgba(245,166,35,0.15);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .road-content { padding-top: 2px; }
+  .road-phase {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .road-item.active .road-phase { color: var(--green); }
+  .road-item.next .road-phase { color: var(--amber); }
+  .road-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+  .road-tasks {
+    font-size: 0.82rem; color: var(--muted);
+    line-height: 1.8;
+  }
+  .road-tasks span::before { content: '— '; color: var(--border); }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .feat {
+    padding: 1.6rem;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .feat:hover {
+    border-color: rgba(0,229,160,0.25);
+    transform: translateY(-3px);
+  }
+  .feat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .feat-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--white);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+  .feat-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── CASE STUDIES ── */
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .case-card {
+    background: var(--bg2);
+    padding: 2rem;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .case-card:hover { background: var(--bg3); }
+  .case-year {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+  .case-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    line-height: 1.1;
+  }
+  .case-loss {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--red);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .case-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.2rem; }
+  .case-lessons {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  .case-lesson {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+  }
+
+  /* ── TECH STACK ── */
+  .stack-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+  }
+  .stack-layer {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+  .stack-layer-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--green);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .stack-items { display: flex; flex-direction: column; gap: 0.5rem; }
+  .stack-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.8rem; color: var(--text);
+  }
+  .stack-item::before {
+    content: '▸';
+    color: var(--muted);
+    font-size: 0.6rem;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px; height: 300px;
+    background: radial-gradient(ellipse, rgba(0,229,160,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .cta-section h2 { margin-bottom: 1rem; }
+  .cta-section p { color: var(--muted); max-width: 480px; margin: 0 auto 2.5rem; font-size: 1rem; }
+  .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+  }
+  footer .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--green);
+  }
+  footer .copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  footer .links {
+    display: flex; gap: 1.5rem; list-style: none;
+  }
+  footer .links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+  }
+  footer .links a:hover { color: var(--green); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 2.5rem; gap: 0; overflow-x: auto; }
+  .tab {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .arch-layout { grid-template-columns: 1fr; }
+    .stack-grid { grid-template-columns: 1fr 1fr; }
+    .hero-stats { gap: 2rem; }
+    h1 { font-size: 3.5rem; }
+    h2 { font-size: 2.5rem; }
+  }
+  @media (max-width: 480px) {
+    .stack-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">openrisk<span>.academy</span></div>
+  <ul class="nav-links">
+    <li><a href="#certifications">CERTS</a></li>
+    <li><a href="#cases">CASES</a></li>
+    <li><a href="#architecture">ARCH</a></li>
+    <li><a href="#roadmap">ROADMAP</a></li>
+    <li><a href="#stack">TECH</a></li>
+  </ul>
+  <a href="https://github.com" class="nav-cta">★ STAR ON GITHUB</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Open Source · Free Forever · Community Powered
+    </div>
+    <h1>
+      <span class="accent">MASTER</span> RISK<br>
+      <span class="line2">SMASH THE PAYWALL</span>
+    </h1>
+    <p class="hero-sub">
+      World-class financial risk education for <strong>everyone</strong> — the banker in Nairobi, the student in Mumbai, the quant in Jakarta. No $1,000 exam fees. No $500 textbooks. Just pure, battle-tested knowledge.
+    </p>
+    <div class="hero-actions">
+      <a href="#certifications" class="btn-primary">
+        🎯 START LEARNING FREE
+      </a>
+      <a href="https://github.com" class="btn-secondary">
+        Fork on GitHub →
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">12<span class="unit">+</span></div>
+        <div class="stat-label">Certifications</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5<span class="unit">K+</span></div>
+        <div class="stat-label">Practice Questions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">20<span class="unit">+</span></div>
+        <div class="stat-label">Crisis Case Studies</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">$0<span class="unit"></span></div>
+        <div class="stat-label">Cost. Always.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <div class="ticker-item"><span class="tag">FRM</span><span>Financial Risk Manager · Complete Coverage</span></div>
+    <div class="ticker-item"><span class="tag">CFA</span><span>All 3 Levels · Investment Analysis</span></div>
+    <div class="ticker-item"><span class="tag">LTCM 1998</span><span class="val">-$4.6B · Leverage Collapse</span></div>
+    <div class="ticker-item"><span class="tag">GFC 2008</span><span class="val">-$2T+ · Systemic Risk</span></div>
+    <div class="ticker-item"><span class="tag">PRM</span><span>Professional Risk Manager</span></div>
+    <div class="ticker-item"><span class="tag">CAIA</span><span>Alternative Investments</span></div>
+    <div class="ticker-item"><span class="tag">ARCHEGOS 2021</span><span class="val">-$20B · Concentration Risk</span></div>
+    <div class="ticker-item"><span class="tag">CQF</span><span>Quantitative Finance · Python</span></div>
+    <div class="ticker-item"><span class="tag">VaR · CVaR · ES</span><span>Risk Metrics Deep Dive</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="ticker-item"><span class="tag">FRM</span><span>Financial Risk Manager · Complete Coverage</span></div>
+    <div class="ticker-item"><span class="tag">CFA</span><span>All 3 Levels · Investment Analysis</span></div>
+    <div class="ticker-item"><span class="tag">LTCM 1998</span><span class="val">-$4.6B · Leverage Collapse</span></div>
+    <div class="ticker-item"><span class="tag">GFC 2008</span><span class="val">-$2T+ · Systemic Risk</span></div>
+    <div class="ticker-item"><span class="tag">PRM</span><span>Professional Risk Manager</span></div>
+    <div class="ticker-item"><span class="tag">CAIA</span><span>Alternative Investments</span></div>
+    <div class="ticker-item"><span class="tag">ARCHEGOS 2021</span><span class="val">-$20B · Concentration Risk</span></div>
+    <div class="ticker-item"><span class="tag">CQF</span><span>Quantitative Finance · Python</span></div>
+    <div class="ticker-item"><span class="tag">VaR · CVaR · ES</span><span>Risk Metrics Deep Dive</span></div>
+  </div>
+</div>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-inner">
+    <div class="section-label">The Arsenal</div>
+    <h2>12 CERTS.<br><span class="dim">ZERO PAYWALLS.</span></h2>
+    <p class="section-desc">Complete learning pathways from foundations to mastery. Every certification. Every level. Fully open.</p>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'tier1')">BIG GUNS</button>
+      <button class="tab" onclick="switchTab(this,'tier2')">SPECIALIZED</button>
+      <button class="tab" onclick="switchTab(this,'tier3')">TECH-QUANT</button>
+      <button class="tab" onclick="switchTab(this,'tier4')">REGULATORY</button>
+    </div>
+
+    <div id="tier1" class="tab-panel active">
+      <div class="cert-grid">
+        <a class="cert-card" style="--card-accent:#00e5a0" href="#">
+          <div class="cert-tier">GARP · Tier 1</div>
+          <div class="cert-name">FRM</div>
+          <div class="cert-full">Financial Risk Manager — Part I & II</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Market Risk</span>
+            <span class="cert-tag">Credit Risk</span>
+            <span class="cert-tag">Ops Risk</span>
+            <span class="cert-tag">VaR</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status live"><span class="dot"></span>LIVE</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#4fc3f7" href="#">
+          <div class="cert-tier">CFA Institute · All 3 Levels</div>
+          <div class="cert-name">CFA</div>
+          <div class="cert-full">Chartered Financial Analyst — L1, L2, L3</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Portfolio Mgmt</span>
+            <span class="cert-tag">Equity</span>
+            <span class="cert-tag">Fixed Income</span>
+            <span class="cert-tag">Ethics</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>IN PROGRESS</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#b39ddb" href="#">
+          <div class="cert-tier">PRMIA · Full Exam</div>
+          <div class="cert-name">PRM</div>
+          <div class="cert-full">Professional Risk Manager</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Risk Theory</span>
+            <span class="cert-tag">Math Finance</span>
+            <span class="cert-tag">Case Studies</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div id="tier2" class="tab-panel">
+      <div class="cert-grid">
+        <a class="cert-card" style="--card-accent:#f5a623" href="#">
+          <div class="cert-tier">CAIA Association</div>
+          <div class="cert-name">CAIA</div>
+          <div class="cert-full">Chartered Alternative Investment Analyst</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Hedge Funds</span><span class="cert-tag">Private Equity</span><span class="cert-tag">Real Assets</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#00e5a0" href="#">
+          <div class="cert-tier">CFA Institute</div>
+          <div class="cert-name">CIPM</div>
+          <div class="cert-full">Investment Performance Measurement</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Attribution</span><span class="cert-tag">GIPS</span><span class="cert-tag">Appraisal</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#ff4757" href="#">
+          <div class="cert-tier">GARP Specialty</div>
+          <div class="cert-name">ERP</div>
+          <div class="cert-full">Energy Risk Professional</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Commodities</span><span class="cert-tag">Energy Markets</span><span class="cert-tag">Trading</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div id="tier3" class="tab-panel">
+      <div class="cert-grid">
+        <a class="cert-card" style="--card-accent:#4fc3f7" href="#">
+          <div class="cert-tier">Fitch Learning</div>
+          <div class="cert-name">CQF</div>
+          <div class="cert-full">Certificate in Quantitative Finance</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Python</span><span class="cert-tag">Stochastic Calc</span><span class="cert-tag">ML in Finance</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#00e5a0" href="#">
+          <div class="cert-tier">CFP Board</div>
+          <div class="cert-name">CFP</div>
+          <div class="cert-full">Certified Financial Planner</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Wealth Mgmt</span><span class="cert-tag">Tax Planning</span><span class="cert-tag">Retirement</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#b39ddb" href="#">
+          <div class="cert-tier">SOA / CAS</div>
+          <div class="cert-name">CERA</div>
+          <div class="cert-full">Chartered Enterprise Risk Actuary</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Enterprise Risk</span><span class="cert-tag">Capital Models</span><span class="cert-tag">ERM</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div id="tier4" class="tab-panel">
+      <div class="cert-grid">
+        <a class="cert-card" style="--card-accent:#f5a623" href="#">
+          <div class="cert-tier">ABA</div>
+          <div class="cert-name">CRCM</div>
+          <div class="cert-full">Certified Regulatory Compliance Manager</div>
+          <div class="cert-tags">
+            <span class="cert-tag">BSA/AML</span><span class="cert-tag">Basel III</span><span class="cert-tag">Dodd-Frank</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#ff4757" href="#">
+          <div class="cert-tier">ACAMS</div>
+          <div class="cert-name">CAMS</div>
+          <div class="cert-full">Certified Anti-Money Laundering Specialist</div>
+          <div class="cert-tags">
+            <span class="cert-tag">AML</span><span class="cert-tag">Sanctions</span><span class="cert-tag">KYC</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+        <a class="cert-card" style="--card-accent:#4fc3f7" href="#">
+          <div class="cert-tier">CFI</div>
+          <div class="cert-name">CBCA</div>
+          <div class="cert-full">Commercial Banking &amp; Credit Analyst</div>
+          <div class="cert-tags">
+            <span class="cert-tag">Credit Analysis</span><span class="cert-tag">LBO</span><span class="cert-tag">Lending</span>
+          </div>
+          <div class="cert-meta">
+            <span class="cert-status"><span class="dot"></span>PLANNED</span>
+            <span class="cert-arrow">→</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases" style="background:var(--bg2); border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label">Interactive Engine</div>
+    <h2>REAL DISASTERS.<br><span class="dim">REAL LESSONS.</span></h2>
+    <p class="section-desc">Step inside the decisions that caused trillion-dollar collapses. Make the calls. See the consequences. Learn the risk principles through lived simulation.</p>
+
+    <div class="cases-grid">
+      <div class="case-card">
+        <div class="case-year">1994–1998 · GREENWICH, CT</div>
+        <div class="case-name">Long-Term Capital Management</div>
+        <div class="case-loss">▼ $4.6 BILLION LOSS</div>
+        <div class="case-desc">Nobel laureates bet their models were right and the market was wrong. 25:1 leverage. The market stayed irrational longer than they could stay solvent.</div>
+        <div class="case-lessons">
+          <span class="case-lesson">MODEL RISK</span>
+          <span class="case-lesson">LEVERAGE</span>
+          <span class="case-lesson">LIQUIDITY RISK</span>
+          <span class="case-lesson">CORRELATION BREAKDOWN</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-year">2007–2009 · GLOBAL</div>
+        <div class="case-name">The Great Financial Crisis</div>
+        <div class="case-loss">▼ $2 TRILLION+ LOSS</div>
+        <div class="case-desc">AAA-rated CDOs backed by subprime mortgages. Rating agency failures. Contagion across an interconnected global system. Systemic risk made visible.</div>
+        <div class="case-lessons">
+          <span class="case-lesson">SYSTEMIC RISK</span>
+          <span class="case-lesson">CREDIT RISK</span>
+          <span class="case-lesson">CDO MECHANICS</span>
+          <span class="case-lesson">CONTAGION</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-year">2021 · NEW YORK</div>
+        <div class="case-name">Archegos Capital</div>
+        <div class="case-loss">▼ $20 BILLION LOSS</div>
+        <div class="case-desc">Total Return Swaps hid $100B+ in concentrated positions from regulators. Margin calls triggered a fire sale that wiped out banks in hours.</div>
+        <div class="case-lessons">
+          <span class="case-lesson">CONCENTRATION RISK</span>
+          <span class="case-lesson">HIDDEN LEVERAGE</span>
+          <span class="case-lesson">TRS EXPOSURE</span>
+          <span class="case-lesson">COUNTERPARTY RISK</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-year">1995 · SINGAPORE</div>
+        <div class="case-name">Barings Bank</div>
+        <div class="case-loss">▼ £827 MILLION LOSS</div>
+        <div class="case-desc">A single trader in Singapore brought down Britain's oldest bank. Error account 88888. Unauthorized positions. Zero operational controls.</div>
+        <div class="case-lessons">
+          <span class="case-lesson">OPERATIONAL RISK</span>
+          <span class="case-lesson">INTERNAL CONTROLS</span>
+          <span class="case-lesson">ROGUE TRADER</span>
+          <span class="case-lesson">SEGREGATION OF DUTIES</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-year">2001 · HOUSTON, TX</div>
+        <div class="case-name">Enron Collapse</div>
+        <div class="case-loss">▼ $74 BILLION LOSS</div>
+        <div class="case-desc">Mark-to-market accounting, SPEs hiding debt, and a culture of "smartest guys in the room." The biggest corporate fraud in history — until it wasn't.</div>
+        <div class="case-lessons">
+          <span class="case-lesson">ACCOUNTING FRAUD</span>
+          <span class="case-lesson">SPE RISK</span>
+          <span class="case-lesson">GOVERNANCE FAILURE</span>
+          <span class="case-lesson">REPUTATIONAL RISK</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-year">2022 · GLOBAL</div>
+        <div class="case-name">FTX / Crypto Contagion</div>
+        <div class="case-loss">▼ $32 BILLION LOSS</div>
+        <div class="case-desc">Customer funds commingled with proprietary trading. No risk management. No board oversight. Regulatory arbitrage across jurisdictions. Fraud in plain sight.</div>
+        <div class="case-lessons">
+          <span class="case-lesson">CUSTODY RISK</span>
+          <span class="case-lesson">FRAUD</span>
+          <span class="case-lesson">CRYPTO RISK</span>
+          <span class="case-lesson">GOVERNANCE</span>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--muted); text-align:center;">
+      + Lehman Brothers · Bear Stearns · Silicon Valley Bank · Knight Capital · MF Global · Orange County · Societe Generale · and more
+    </p>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture" class="arch-section">
+  <div class="section-inner">
+    <div class="section-label">System Design</div>
+    <h2>THE <span class="dim">ARCHITECTURE</span></h2>
+    <p class="section-desc">GitHub-native, static-first, offline-capable. Built to run free forever with zero infrastructure costs.</p>
+
+    <div class="arch-layout">
+      <div>
+        <div class="arch-tree">
+<span class="folder">openrisk-academy/</span>
+├── <span class="folder">curriculum/</span>
+│   ├── <span class="folder">frm/</span>
+│   │   ├── <span class="folder">part-i/</span>  <span class="comment"># foundations</span>
+│   │   └── <span class="folder">part-ii/</span> <span class="comment"># advanced</span>
+│   ├── <span class="folder">cfa/</span>
+│   │   ├── <span class="folder">level-1/</span>
+│   │   ├── <span class="folder">level-2/</span>
+│   │   └── <span class="folder">level-3/</span>
+│   └── <span class="folder">...</span> <span class="comment"># 12 certs total</span>
+├── <span class="folder">case-studies/</span>
+│   ├── <span class="file">ltcm.md</span>
+│   ├── <span class="file">gfc-2008.md</span>
+│   ├── <span class="file">archegos.md</span>
+│   └── <span class="file">...</span>
+├── <span class="folder">question-bank/</span>
+│   ├── <span class="folder">frm-past-exams/</span>
+│   ├── <span class="folder">practice-sets/</span>
+│   └── <span class="file">questions.json</span>
+├── <span class="folder">tools/</span>
+│   ├── <span class="highlight">var-calculator.html</span>
+│   ├── <span class="highlight">stress-test-engine.html</span>
+│   └── <span class="highlight">scenario-sandbox.html</span>
+├── <span class="folder">_site/</span>  <span class="comment"># generated output</span>
+├── <span class="file">_config.yml</span>  <span class="comment"># Jekyll config</span>
+├── <span class="file">CONTRIBUTING.md</span>
+└── <span class="file">README.md</span>
+        </div>
+      </div>
+
+      <div class="arch-pillars">
+        <div class="pillar">
+          <div class="pillar-num">01</div>
+          <div class="pillar-icon">📄</div>
+          <div class="pillar-title">CONTENT LAYER — MARKDOWN FIRST</div>
+          <div class="pillar-desc">All curriculum, case studies, and questions live as plain Markdown files. Anyone with a text editor can contribute. Git diffs show exactly what changed. PRs become peer reviews.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">02</div>
+          <div class="pillar-icon">⚡</div>
+          <div class="pillar-title">COMPUTE LAYER — STATIC + JS</div>
+          <div class="pillar-desc">Jekyll/Eleventy generates the site. Interactive models run in the browser via vanilla JS or Python (Pyodide). No server. No database. No hosting bill. GitHub Pages delivers it globally.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">03</div>
+          <div class="pillar-icon">🧠</div>
+          <div class="pillar-title">INTELLIGENCE LAYER — ADAPTIVE ENGINE</div>
+          <div class="pillar-desc">Spaced repetition tracks performance per question. LocalStorage + IndexedDB store progress client-side. No account needed. No data leaves the device. Offline PWA support built in.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">04</div>
+          <div class="pillar-icon">🌍</div>
+          <div class="pillar-title">COMMUNITY LAYER — GITHUB NATIVE</div>
+          <div class="pillar-desc">Issues become question reports. Discussions become study groups. PRs become content contributions. GitHub Actions validate question format and run link checks automatically.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-label">Platform Features</div>
+    <h2>WHAT'S <span class="dim">INSIDE</span></h2>
+    <p class="section-desc">Every tool a risk professional needs. None of the gatekeeping.</p>
+
+    <div class="features-grid">
+      <div class="feat">
+        <span class="feat-icon">📚</span>
+        <div class="feat-title">COMPLETE CURRICULUM</div>
+        <div class="feat-desc">Foundations → Advanced → Mastery learning pathways for every certification. Topic summaries, worked examples, formula sheets.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🗄️</span>
+        <div class="feat-title">HISTORICAL EXAM ARCHIVE</div>
+        <div class="feat-desc">Every past exam question, organized by year, topic, and difficulty. Detailed solution walkthroughs. Common traps flagged.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🎭</span>
+        <div class="feat-title">INTERACTIVE CASE STUDIES</div>
+        <div class="feat-desc">Make real-time decisions inside historical crises. See how your choices diverge from what actually happened. Learn from failure safely.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🔢</span>
+        <div class="feat-title">ADAPTIVE PRACTICE ENGINE</div>
+        <div class="feat-desc">Spaced repetition identifies your weak spots. Question difficulty adapts to your performance. Tracks mastery per topic and subtopic.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🧮</span>
+        <div class="feat-title">RISK MODELING SANDBOX</div>
+        <div class="feat-desc">In-browser VaR calculator, Monte Carlo simulator, stress testing tool, and yield curve modeler. Python notebooks via Pyodide. No install needed.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">📶</span>
+        <div class="feat-title">OFFLINE-FIRST PWA</div>
+        <div class="feat-desc">Installs on any device. Full functionality without internet. Progress syncs when connection returns. Built for students in low-bandwidth regions.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🤝</span>
+        <div class="feat-title">COMMUNITY CONTRIBUTIONS</div>
+        <div class="feat-desc">Wikipedia-meets-GitHub model. Anyone can contribute questions, corrections, case studies. All changes peer-reviewed via PRs. Quality enforced by CI.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">PROGRESS TRACKING</div>
+        <div class="feat-desc">Visual progress dashboards stored in-browser. Estimated readiness scores. Time-to-exam planning tools. All data stays on your device.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="stack" style="background:var(--bg2); border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-label">Technical Foundation</div>
+    <h2>THE <span class="dim">STACK</span></h2>
+    <p class="section-desc">Zero server costs. Maximum reach. Built to last forever on GitHub's infrastructure.</p>
+
+    <div class="stack-grid">
+      <div class="stack-layer">
+        <div class="stack-layer-label">▸ HOSTING & DEPLOY</div>
+        <div class="stack-items">
+          <div class="stack-item">GitHub Pages (free)</div>
+          <div class="stack-item">GitHub Actions CI/CD</div>
+          <div class="stack-item">Cloudflare CDN (optional)</div>
+          <div class="stack-item">Custom domain support</div>
+        </div>
+      </div>
+      <div class="stack-layer">
+        <div class="stack-layer-label">▸ SITE GENERATION</div>
+        <div class="stack-items">
+          <div class="stack-item">Jekyll or Eleventy (11ty)</div>
+          <div class="stack-item">Markdown + YAML frontmatter</div>
+          <div class="stack-item">Nunjucks / Liquid templates</div>
+          <div class="stack-item">JSON question database</div>
+        </div>
+      </div>
+      <div class="stack-layer">
+        <div class="stack-layer-label">▸ INTERACTIVITY</div>
+        <div class="stack-items">
+          <div class="stack-item">Vanilla JS (no framework lock-in)</div>
+          <div class="stack-item">Pyodide (Python in browser)</div>
+          <div class="stack-item">Chart.js / D3 for visuals</div>
+          <div class="stack-item">MathJax for formulas</div>
+        </div>
+      </div>
+      <div class="stack-layer">
+        <div class="stack-layer-label">▸ OFFLINE & STORAGE</div>
+        <div class="stack-items">
+          <div class="stack-item">Service Workers (PWA)</div>
+          <div class="stack-item">IndexedDB (progress data)</div>
+          <div class="stack-item">LocalStorage (settings)</div>
+          <div class="stack-item">Zero backend required</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="section-inner">
+    <div class="section-label">Build Plan</div>
+    <h2>THE <span class="dim">ROADMAP</span></h2>
+    <p class="section-desc">From zero to the world's best free financial risk education platform. Phased, deliberate, community-driven.</p>
+
+    <div style="max-width:680px">
+      <div class="roadmap">
+        <div class="road-item active">
+          <div class="road-dot">✓</div>
+          <div class="road-content">
+            <div class="road-phase">PHASE 1 · MONTHS 1–2 · NOW</div>
+            <div class="road-title">FRM Foundation — Launch Core</div>
+            <div class="road-tasks">
+              <span>Repo structure & Jekyll setup</span><br>
+              <span>FRM Part I complete curriculum (Markdown)</span><br>
+              <span>300 practice questions (JSON format)</span><br>
+              <span>Basic quiz engine (vanilla JS)</span><br>
+              <span>5 case studies (LTCM, 2008, Barings, Enron, Archegos)</span>
+            </div>
+          </div>
+        </div>
+        <div class="road-item next">
+          <div class="road-dot">2</div>
+          <div class="road-content">
+            <div class="road-phase">PHASE 2 · MONTHS 3–5</div>
+            <div class="road-title">FRM Complete + Adaptive Engine</div>
+            <div class="road-tasks">
+              <span>FRM Part II curriculum</span><br>
+              <span>Spaced repetition algorithm</span><br>
+              <span>Progress tracking dashboard</span><br>
+              <span>VaR & CVaR calculator tool</span><br>
+              <span>PWA / offline support</span>
+            </div>
+          </div>
+        </div>
+        <div class="road-item">
+          <div class="road-dot">3</div>
+          <div class="road-content">
+            <div class="road-phase">PHASE 3 · MONTHS 6–8</div>
+            <div class="road-title">CFA L1 + Interactive Cases</div>
+            <div class="road-tasks">
+              <span>CFA Level 1 complete coverage</span><br>
+              <span>Decision-tree case study engine</span><br>
+              <span>Monte Carlo scenario sandbox</span><br>
+              <span>Community contribution pipeline (PRs)</span>
+            </div>
+          </div>
+        </div>
+        <div class="road-item">
+          <div class="road-dot">4</div>
+          <div class="road-content">
+            <div class="road-phase">PHASE 4 · MONTHS 9–14</div>
+            <div class="road-title">CFA L2/L3 + CQF + PRM</div>
+            <div class="road-tasks">
+              <span>CFA Levels 2 & 3</span><br>
+              <span>CQF quantitative track (Python-heavy)</span><br>
+              <span>PRM full exam coverage</span><br>
+              <span>Pyodide Python notebook integration</span>
+            </div>
+          </div>
+        </div>
+        <div class="road-item">
+          <div class="road-dot">5</div>
+          <div class="road-content">
+            <div class="road-phase">PHASE 5 · MONTHS 15–24</div>
+            <div class="road-title">Full Arsenal — All 12 Certifications</div>
+            <div class="road-tasks">
+              <span>CAIA, CIPM, ERP, CFP, CERA</span><br>
+              <span>CRCM, CAMS, CBCA regulatory track</span><br>
+              <span>Multilingual support (ES, FR, AR, ZH, PT)</span><br>
+              <span>50+ case studies, 5,000+ questions</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-glow"></div>
+  <div style="position:relative; z-index:1;">
+    <div class="section-label" style="justify-content:center;">Join the Revolution</div>
+    <h2>BUILD THIS<br><span class="dim">WITH US</span></h2>
+    <p>The kid in Mumbai and the banker in Nairobi deserve the same knowledge as anyone on Wall Street. Help us make that real. Star the repo. Contribute content. Spread the word.</p>
+    <div class="cta-actions">
+      <a href="https://github.com" class="btn-primary">★ Star on GitHub</a>
+      <a href="https://github.com" class="btn-secondary">Read CONTRIBUTING.md →</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">openrisk.academy</div>
+  <ul class="links">
+    <li><a href="#">GitHub</a></li>
+    <li><a href="#">Contributing</a></li>
+    <li><a href="#">License (MIT)</a></li>
+    <li><a href="#">Discussions</a></li>
+  </ul>
+  <div class="copy">MIT LICENSE · FREE AS IN FREEDOM · FREE AS IN BEER</div>
+</footer>
+
+<script>
+function switchTab(el, panelId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// Animate elements on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.cert-card, .feat, .case-card, .pillar, .stack-layer').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>
