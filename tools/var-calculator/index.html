@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VaR Calculator — OpenRisk Academy</title>
+<link rel="stylesheet" href="../../assets/css/main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  .tool-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .method-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .method-tab {
+    font-family: var(--mono); font-size: 0.7rem;
+    color: var(--muted); letter-spacing: 0.08em;
+    padding: 0.7rem 1.4rem; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    background: none; border-top:none; border-left:none; border-right:none;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .method-tab:hover { color: var(--text); }
+  .method-tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .method-panel { display: none; }
+  .method-panel.active { display: block; }
+  .chart-container {
+    position: relative; height: 260px;
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+  .hist-input {
+    width: 100%; height: 100px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--code); font-size: 0.78rem;
+    padding: 0.8rem; resize: vertical; outline: none;
+    border-radius: 2px; line-height: 1.5;
+  }
+  .hist-input:focus { border-color: var(--green); }
+  .insight-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 1.2rem; margin-top: 1rem;
+  }
+  .insight-title {
+    font-family: var(--mono); font-size: 0.62rem;
+    color: var(--amber); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 0.8rem;
+  }
+  .insight-row {
+    display: flex; gap: 0.5rem; font-size: 0.85rem;
+    color: var(--text); margin-bottom: 0.4rem;
+    align-items: flex-start;
+  }
+  .insight-row::before { content: '›'; color: var(--muted); flex-shrink:0; }
+  @media (max-width: 768px) {
+    .tool-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="ora-nav">
+  <a href="../../index.html" class="ora-nav-logo">openrisk<span>.academy</span></a>
+  <ul class="ora-nav-links">
+    <li><a href="../../index.html">HOME</a></li>
+    <li><a href="../../curriculum/frm/part-i/index.html">FRM PART I</a></li>
+    <li><a href="../../case-studies/ltcm-1998.html">CASES</a></li>
+    <li><a href="#" class="active">TOOLS</a></li>
+    <li><a href="../../question-bank/frm/practice-sets/market-risk-quiz.html">QUIZ</a></li>
+  </ul>
+  <a href="https://github.com/Dalfino/openrisk-academy" class="ora-nav-github">★ GITHUB</a>
+</nav>
+
+<div class="ora-page">
+
+  <div class="ora-breadcrumb">
+    <a href="../../index.html">HOME</a>
+    <span class="sep">›</span>
+    <a href="#">Tools</a>
+    <span class="sep">›</span>
+    <span class="current">VaR & ES Calculator</span>
+  </div>
+
+  <div class="ora-content-wrap">
+
+    <div class="ora-label">Risk Modeling Tool</div>
+    <h1 class="ora-h1" style="font-size:clamp(2rem,5vw,3.5rem);">VaR & ES<br><span style="color:var(--muted)">CALCULATOR</span></h1>
+    <p style="color:var(--muted); max-width:560px; margin:1rem 0 2rem; line-height:1.7;">
+      Compute Value at Risk and Expected Shortfall using parametric (normal distribution) or historical simulation methods. Visualize the loss distribution and understand tail risk.
+    </p>
+
+    <!-- METHOD TABS -->
+    <div class="method-tabs">
+      <button class="method-tab active" onclick="switchMethod(this,'parametric')">PARAMETRIC (NORMAL)</button>
+      <button class="method-tab" onclick="switchMethod(this,'historical')">HISTORICAL SIMULATION</button>
+    </div>
+
+    <!-- ═══ PARAMETRIC METHOD ═══ -->
+    <div id="parametric" class="method-panel active">
+
+      <div class="tool-layout">
+        <div class="tool-panel">
+          <div class="tool-panel-title">▸ Portfolio Parameters</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Portfolio Value ($)</label>
+              <input type="number" id="p-portvalue" class="form-input" value="10000000" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Daily Volatility (%)</label>
+              <input type="number" id="p-vol" class="form-input" value="1.5" step="0.01" min="0.01">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Confidence Level</label>
+              <select id="p-conf" class="form-select">
+                <option value="0.90">90% (z = 1.282)</option>
+                <option value="0.95" selected>95% (z = 1.645)</option>
+                <option value="0.975">97.5% (z = 1.960) — Basel ES</option>
+                <option value="0.99">99% (z = 2.326)</option>
+                <option value="0.995">99.5% (z = 2.576)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time Horizon (days)</label>
+              <input type="number" id="p-days" class="form-input" value="1" min="1" max="500">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Daily Expected Return (%)</label>
+              <input type="number" id="p-mu" class="form-input" value="0" step="0.001">
+            </div>
+          </div>
+          <button class="ora-btn primary" style="width:100%; justify-content:center;" onclick="calcParametric()">
+            CALCULATE VaR & ES
+          </button>
+        </div>
+
+        <div class="tool-panel">
+          <div class="tool-panel-title">▸ Results</div>
+          <div class="result-grid">
+            <div class="result-cell">
+              <div class="r-label">VaR (α)</div>
+              <div class="r-value negative" id="p-res-var">—</div>
+              <div class="r-sub" id="p-res-var-pct">—</div>
+            </div>
+            <div class="result-cell">
+              <div class="r-label">Expected Shortfall</div>
+              <div class="r-value negative" id="p-res-es">—</div>
+              <div class="r-sub" id="p-res-es-pct">—</div>
+            </div>
+            <div class="result-cell">
+              <div class="r-label">z-score Used</div>
+              <div class="r-value" id="p-res-z" style="color:var(--blue)">—</div>
+              <div class="r-sub" id="p-res-conf">—</div>
+            </div>
+            <div class="result-cell">
+              <div class="r-label">Daily σ ($)</div>
+              <div class="r-value" id="p-res-sigma" style="color:var(--text); font-size:1.3rem;">—</div>
+              <div class="r-sub" id="p-res-sigma-pct">—</div>
+            </div>
+          </div>
+
+          <div id="p-insights" class="insight-box" style="display:none;">
+            <div class="insight-title">⚡ Risk Insights</div>
+            <div id="p-insight-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART -->
+      <div class="chart-container">
+        <canvas id="p-chart"></canvas>
+      </div>
+      <p style="font-family:var(--mono); font-size:0.62rem; color:var(--muted); margin-top:0.5rem; text-align:center;">
+        Normal distribution of daily P&L. Red shaded area = tail beyond VaR. Orange line = Expected Shortfall.
+      </p>
+    </div>
+
+    <!-- ═══ HISTORICAL METHOD ═══ -->
+    <div id="historical" class="method-panel">
+
+      <div class="tool-layout">
+        <div class="tool-panel">
+          <div class="tool-panel-title">▸ Historical Returns Input</div>
+          <label class="form-label" style="display:block; margin-bottom:0.5rem;">
+            Paste daily returns (% or decimal, one per line or comma-separated)
+          </label>
+          <textarea id="h-returns" class="hist-input" placeholder="e.g.
+0.012
+-0.023
+0.008
+-0.045
+0.015
+..."></textarea>
+          <div style="margin-top:0.8rem; display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center;">
+            <div class="form-group" style="min-width:120px;">
+              <label class="form-label">Portfolio Value ($)</label>
+              <input type="number" id="h-portvalue" class="form-input" value="10000000">
+            </div>
+            <div class="form-group" style="min-width:120px;">
+              <label class="form-label">Confidence Level</label>
+              <select id="h-conf" class="form-select">
+                <option value="0.90">90%</option>
+                <option value="0.95" selected>95%</option>
+                <option value="0.975">97.5%</option>
+                <option value="0.99">99%</option>
+              </select>
+            </div>
+          </div>
+          <button class="ora-btn primary" style="width:100%; justify-content:center; margin-top:1rem;" onclick="calcHistorical()">
+            RUN HISTORICAL VaR
+          </button>
+          <button class="ora-btn secondary" style="width:100%; justify-content:center; margin-top:0.5rem;" onclick="loadSampleData()">
+            Load Sample Data (500 days)
+          </button>
+        </div>
+
+        <div class="tool-panel">
+          <div class="tool-panel-title">▸ Results</div>
+          <div class="result-grid">
+            <div class="result-cell">
+              <div class="r-label">Historical VaR</div>
+              <div class="r-value negative" id="h-res-var">—</div>
+              <div class="r-sub" id="h-res-var-pct">—</div>
+            </div>
+            <div class="result-cell">
+              <div class="r-label">Historical ES</div>
+              <div class="r-value negative" id="h-res-es">—</div>
+              <div class="r-sub" id="h-res-es-pct">—</div>
+            </div>
+            <div class="result-cell">
+              <div class="r-label">Observations</div>
+              <div class="r-value" id="h-res-n" style="color:var(--blue);">—</div>
+              <div class="r-sub">data points</div>
+            </div>
+            <div class="result-cell">
+              <div class="r-label">Max Loss</div>
+              <div class="r-value negative" id="h-res-max" style="font-size:1.3rem;">—</div>
+              <div class="r-sub">worst single day</div>
+            </div>
+          </div>
+          <div id="h-insights" class="insight-box" style="display:none; margin-top:1rem;">
+            <div class="insight-title">⚡ Historical Insights</div>
+            <div id="h-insight-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="h-chart"></canvas>
+      </div>
+      <p style="font-family:var(--mono); font-size:0.62rem; color:var(--muted); margin-top:0.5rem; text-align:center;">
+        Histogram of historical daily returns. Red zone = losses beyond VaR threshold.
+      </p>
+    </div>
+
+    <!-- FORMULA REFERENCE -->
+    <div style="margin-top:2rem;">
+      <h2 class="ora-h2" style="font-size:1.5rem;">Formula Reference</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+        <div class="ora-formula">
+          <div class="label">PARAMETRIC VaR</div>
+          <div class="math" style="font-size:0.82rem;">
+            VaR = (μ − z<sub>α</sub> × σ) × √T × V<br>
+            Where σ = daily volatility, V = portfolio value<br>
+            z<sub>95%</sub>=1.645 &nbsp; z<sub>99%</sub>=2.326
+          </div>
+        </div>
+        <div class="ora-formula">
+          <div class="label">PARAMETRIC ES (NORMAL DIST.)</div>
+          <div class="math" style="font-size:0.82rem;">
+            ES = μ + σ × φ(z<sub>α</sub>)/(1−α)<br>
+            Where φ(z) = standard normal PDF<br>
+            ES always ≥ VaR at same confidence
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem;">
+      <a href="../../curriculum/frm/part-i/01-foundations-of-risk/var-and-expected-shortfall.html" class="ora-btn secondary">📚 Learn the Theory Behind This Tool →</a>
+    </div>
+
+  </div>
+
+  <footer class="ora-footer">
+    <div class="logo">openrisk.academy</div>
+    <div class="copy">MIT LICENSE · FREE FOREVER · OPEN SOURCE</div>
+  </footer>
+
+</div>
+
+<script>
+// ── UTILITY FUNCTIONS ──
+const normalPDF = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+const normalCDF = x => {
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1.0 / (1.0 + p * x);
+  const y = 1.0 - (((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return 0.5*(1.0+sign*y);
+};
+const invNorm = {0.90:1.282, 0.95:1.645, 0.975:1.960, 0.99:2.326, 0.995:2.576};
+const fmt = n => {
+  if(n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if(n >= 1e3) return '$' + (n/1e3).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+};
+
+function switchMethod(btn, panel) {
+  document.querySelectorAll('.method-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.method-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panel).classList.add('active');
+}
+
+// ── PARAMETRIC CALCULATION ──
+let pChart = null;
+
+function calcParametric() {
+  const V = parseFloat(document.getElementById('p-portvalue').value);
+  const vol = parseFloat(document.getElementById('p-vol').value) / 100;
+  const alpha = parseFloat(document.getElementById('p-conf').value);
+  const T = parseInt(document.getElementById('p-days').value);
+  const mu = parseFloat(document.getElementById('p-mu').value) / 100;
+
+  const z = invNorm[alpha] || 1.645;
+  const sigmaD = vol * V;
+  const muD = mu * V;
+
+  // VaR (loss convention: positive = loss)
+  const varVal = (z * sigmaD - muD) * Math.sqrt(T);
+  // ES for normal distribution: ES = (-mu + sigma * phi(z)/(1-alpha)) * sqrt(T) * V
+  const esVal = (-muD + sigmaD * normalPDF(z) / (1 - alpha)) * Math.sqrt(T);
+
+  document.getElementById('p-res-var').textContent = fmt(varVal);
+  document.getElementById('p-res-var-pct').textContent = (varVal/V*100).toFixed(2)+'% of portfolio';
+  document.getElementById('p-res-es').textContent = fmt(esVal);
+  document.getElementById('p-res-es-pct').textContent = (esVal/V*100).toFixed(2)+'% of portfolio';
+  document.getElementById('p-res-z').textContent = z.toFixed(3);
+  document.getElementById('p-res-conf').textContent = (alpha*100)+'% confidence';
+  document.getElementById('p-res-sigma').textContent = fmt(sigmaD);
+  document.getElementById('p-res-sigma-pct').textContent = 'per day (1σ)';
+
+  // Insights
+  const confPct = Math.round((1-alpha)*100);
+  document.getElementById('p-insight-content').innerHTML = `
+    <div class="insight-row">On average, losses will exceed ${fmt(varVal)} on ${confPct} out of every 100 ${T===1?'trading days':'periods'}.</div>
+    <div class="insight-row">When losses DO exceed VaR, the expected average loss is ${fmt(esVal)} — ${((esVal/varVal-1)*100).toFixed(0)}% worse than the VaR threshold.</div>
+    <div class="insight-row">Annual VaR (≈252 days): ${fmt(varVal * Math.sqrt(252/T))} at ${alpha*100}% confidence.</div>
+  `;
+  document.getElementById('p-insights').style.display = 'block';
+
+  drawParametricChart(V, sigmaD, muD, T, z, alpha, varVal, esVal);
+}
+
+function drawParametricChart(V, sigmaD, muD, T, z, alpha, varVal, esVal) {
+  const sigma_T = sigmaD * Math.sqrt(T);
+  const mu_T = muD * T;
+
+  // Generate points for normal distribution
+  const xMin = mu_T - 4 * sigma_T;
+  const xMax = mu_T + 4 * sigma_T;
+  const steps = 300;
+  const labels = [], data = [], bgColors = [];
+  const varX = -varVal; // VaR is a loss, chart shows P&L (negative loss)
+  const esX = -esVal;
+
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + (xMax - xMin) * i / steps;
+    const y = normalPDF((x - mu_T) / sigma_T) / sigma_T;
+    labels.push((x / V * 100).toFixed(2) + '%');
+    data.push({ x: x / V * 100, y });
+    bgColors.push(x < varX ? 'rgba(255,71,87,0.5)' : 'rgba(0,229,160,0.15)');
+  }
+
+  const ctx = document.getElementById('p-chart').getContext('2d');
+  if (pChart) pChart.destroy();
+
+  pChart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'P&L Distribution',
+        data: data.map(d => ({x: d.x, y: d.y})),
+        backgroundColor: bgColors,
+        borderColor: bgColors,
+        pointRadius: 0,
+        showLine: true,
+        fill: true,
+        tension: 0.4,
+        borderWidth: 1.5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `P&L: ${ctx.parsed.x.toFixed(2)}%`
+          }
+        },
+        annotation: {
+          annotations: {
+            varLine: {
+              type: 'line',
+              x: (varX / V * 100),
+              scaleID: 'x',
+              borderColor: '#ff4757',
+              borderWidth: 2,
+              label: { content: `VaR`, display: true, color: '#ff4757', font:{family:'Space Mono', size:10} }
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          title: { display: true, text: 'Daily P&L (%)', color: '#4a6070', font:{family:'Space Mono', size:10} },
+          grid: { color: '#1e2d38' },
+          ticks: { color: '#4a6070', font:{family:'Space Mono', size:9} }
+        },
+        y: {
+          title: { display: false },
+          grid: { color: '#1e2d38' },
+          ticks: { color: '#4a6070', font:{family:'Space Mono', size:9} }
+        }
+      }
+    }
+  });
+}
+
+// ── HISTORICAL CALCULATION ──
+let hChart = null;
+
+function calcHistorical() {
+  const raw = document.getElementById('h-returns').value;
+  const V = parseFloat(document.getElementById('h-portvalue').value);
+  const alpha = parseFloat(document.getElementById('h-conf').value);
+
+  // Parse returns
+  let returns = raw.split(/[\n,\s]+/)
+    .map(s => s.trim())
+    .filter(s => s !== '')
+    .map(s => parseFloat(s));
+
+  // Auto-detect: if values look like percentages (>0.1 average abs), convert
+  const avgAbs = returns.reduce((a,b) => a + Math.abs(b), 0) / returns.length;
+  if (avgAbs > 0.1) returns = returns.map(r => r / 100);
+
+  if (returns.length < 10) {
+    alert('Please enter at least 10 return observations.'); return;
+  }
+
+  // Sort losses (negative returns become positive losses)
+  const losses = returns.map(r => -r * V).sort((a, b) => b - a);
+  const n = losses.length;
+  const cutoff = Math.ceil(n * (1 - alpha));
+
+  const varVal = losses[cutoff - 1];
+  const tailLosses = losses.slice(0, cutoff);
+  const esVal = tailLosses.reduce((a, b) => a + b, 0) / tailLosses.length;
+  const maxLoss = losses[0];
+
+  document.getElementById('h-res-var').textContent = fmt(varVal);
+  document.getElementById('h-res-var-pct').textContent = (varVal/V*100).toFixed(2)+'% of portfolio';
+  document.getElementById('h-res-es').textContent = fmt(esVal);
+  document.getElementById('h-res-es-pct').textContent = (esVal/V*100).toFixed(2)+'% of portfolio';
+  document.getElementById('h-res-n').textContent = n;
+  document.getElementById('h-res-max').textContent = fmt(maxLoss);
+
+  const meanR = returns.reduce((a,b)=>a+b,0)/n;
+  const stdR = Math.sqrt(returns.reduce((a,b)=>a+(b-meanR)**2,0)/n);
+
+  document.getElementById('h-insight-content').innerHTML = `
+    <div class="insight-row">Based on ${n} days of history, there were ${cutoff} days with losses exceeding VaR — as expected at ${(1-alpha)*100}% exception rate.</div>
+    <div class="insight-row">Estimated daily volatility from your data: ${(stdR*100).toFixed(3)}%.</div>
+    <div class="insight-row">The worst single day in the dataset was a loss of ${fmt(maxLoss)} (${(-maxLoss/V*100).toFixed(2)}%).</div>
+  `;
+  document.getElementById('h-insights').style.display = 'block';
+
+  drawHistoricalChart(returns, V, alpha, varVal);
+}
+
+function drawHistoricalChart(returns, V, alpha, varVal) {
+  const pctReturns = returns.map(r => r * 100).sort((a,b)=>a-b);
+  const varPct = -varVal / V * 100;
+
+  const bins = 50;
+  const min = pctReturns[0], max = pctReturns[pctReturns.length-1];
+  const binSize = (max - min) / bins;
+  const labels = [], counts = [], colors = [];
+
+  for (let i = 0; i < bins; i++) {
+    const lo = min + i * binSize;
+    const hi = lo + binSize;
+    const mid = (lo + hi) / 2;
+    const count = pctReturns.filter(r => r >= lo && r < hi).length;
+    labels.push(mid.toFixed(2) + '%');
+    counts.push(count);
+    colors.push(mid < varPct ? 'rgba(255,71,87,0.7)' : 'rgba(0,229,160,0.4)');
+  }
+
+  const ctx = document.getElementById('h-chart').getContext('2d');
+  if (hChart) hChart.destroy();
+
+  hChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          title: { display: true, text: 'Daily Return (%)', color:'#4a6070', font:{family:'Space Mono',size:10}},
+          grid: { color:'#1e2d38' },
+          ticks: { color:'#4a6070', font:{family:'Space Mono',size:9}, maxTicksLimit:12 }
+        },
+        y: {
+          title: { display: true, text: 'Frequency', color:'#4a6070', font:{family:'Space Mono',size:10}},
+          grid: { color:'#1e2d38' },
+          ticks: { color:'#4a6070', font:{family:'Space Mono',size:9} }
+        }
+      }
+    }
+  });
+}
+
+function loadSampleData() {
+  // Generate realistic-ish returns using a fat-tailed process
+  const seed = (s => () => { s=Math.sin(s)*10000; return s-Math.floor(s); })(42);
+  const boxMuller = () => {
+    let u=0, v=0;
+    while(u===0) u=seed(); while(v===0) v=seed();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  };
+  let returns = [];
+  let vol = 0.012;
+  for(let i=0; i<500; i++){
+    if(Math.random()<0.02) vol = 0.025; // occasional vol spike
+    if(Math.random()<0.05) vol *= 0.95; // mean revert
+    vol = Math.max(0.008, Math.min(0.035, vol));
+    const r = boxMuller() * vol;
+    returns.push((r*100).toFixed(4));
+  }
+  document.getElementById('h-returns').value = returns.join('\n');
+}
+
+// Auto-calculate on load with defaults
+window.addEventListener('load', () => {
+  calcParametric();
+});
+</script>
+
+</body>
+</html>
